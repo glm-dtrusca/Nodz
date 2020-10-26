@@ -1,6 +1,7 @@
+from __future__ import absolute_import
 from glm.Qtpy import Qt
 from glm.Qtpy.Qt import QtGui, QtCore, QtWidgets
-import nodz_main
+#from . import nodz_main
 
 class QtPopupLineEditWidget(QtWidgets.QLineEdit):
 

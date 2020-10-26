@@ -1,15 +1,22 @@
+from __future__ import division
+from __future__ import print_function
+from __future__ import absolute_import
+from builtins import str
+from builtins import range
+from past.utils import old_div
+from builtins import object
 import os
 import re
 import json
 import copy
 
 from glm.Qtpy.Qt import QtGui, QtCore, QtWidgets
-import nodz_utils as utils
-import nodz_extra
+from . import nodz_utils as utils
+from . import nodz_extra
 
 defaultConfigPath = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'default_config.json')
 
-class ConnectionInfo():
+class ConnectionInfo(object):
      def __init__(self, connectionItem):
         # Storage.
         self.socketNode = connectionItem.socketNode
@@ -170,7 +177,7 @@ class Nodz(QtWidgets.QGraphicsView):
         self.setTransformationAnchor(QtWidgets.QGraphicsView.AnchorUnderMouse)
 
         inFactor = 1.15
-        outFactor = 1 / inFactor
+        outFactor = old_div(1, inFactor)
 
         delta = int(0)
         if (hasattr(event, 'angleDelta') and callable(getattr(event, 'angleDelta'))):
@@ -625,12 +632,12 @@ class Nodz(QtWidgets.QGraphicsView):
                 selected_nodes.append(node.name)
                 if node.scene() is not None: # else already deleted by a previous node
                     # stack all sockets connections.
-                    for socket in node.sockets.values():
+                    for socket in list(node.sockets.values()):
                         for iCon in range(0, len(socket.connections)):
                             removedConnections.append(ConnectionInfo(socket.connections[iCon]))
 
                     # stack all plugs connections.
-                    for plug in node.plugs.values():
+                    for plug in list(node.plugs.values()):
                         for iCon in range(0, len(plug.connections)):
                             removedConnections.append(ConnectionInfo(plug.connections[iCon]))
 
@@ -766,9 +773,9 @@ class Nodz(QtWidgets.QGraphicsView):
         """
         # print("create node {} at creaetNode pos {}".format(name, position))
         # Check for name clashes
-        if name in self.scene().nodes.keys():
-            print 'A node with the same name already exists : {0}'.format(name)
-            print 'Node creation aborted !'
+        if name in list(self.scene().nodes.keys()):
+            print('A node with the same name already exists : {0}'.format(name))
+            print('Node creation aborted !')
             return
         else:
             nodeItem = NodeItem(name=name, alternate=alternate, preset=preset,
@@ -800,12 +807,12 @@ class Nodz(QtWidgets.QGraphicsView):
         :param node: The node instance that you want to delete.
 
         """
-        if not node in self.scene().nodes.values():
-            print 'Node object does not exist !'
-            print 'Node deletion aborted !'
+        if not node in list(self.scene().nodes.values()):
+            print('Node object does not exist !')
+            print('Node deletion aborted !')
             return
 
-        if node in self.scene().nodes.values():
+        if node in list(self.scene().nodes.values()):
             nodeName = node.name
 
             # Should handle UndoRedo here, but deleteNode is not used anywhere in our code
@@ -816,13 +823,13 @@ class Nodz(QtWidgets.QGraphicsView):
             selected_nodes.append(node)
 
             # stack all sockets connections.
-            for socket in node.sockets.values():
+            for socket in list(node.sockets.values()):
                 if len(socket.connections)>0:
                     for socketConnection in socket.connections:
                         removedConnections.append(ConnectionInfo(socketConnection))
 
             # stack all plugs connections.
-            for plug in node.plugs.values():
+            for plug in list(node.plugs.values()):
                 if len(plug.connections)>0:
                     for plugConnection in plug.connections:
                         removedConnections.append(ConnectionInfo(plugConnection))
@@ -847,18 +854,18 @@ class Nodz(QtWidgets.QGraphicsView):
         :param newName: The new name for the given node.
 
         """
-        if not node in self.scene().nodes.values():
-            print 'Node object does not exist !'
-            print 'Node edition aborted !'
+        if not node in list(self.scene().nodes.values()):
+            print('Node object does not exist !')
+            print('Node edition aborted !')
             return
 
         oldName = node.name
 
         if newName is not None:
             # Check for name clashes
-            if newName in self.scene().nodes.keys():
-                print 'A node with the same name already exists : {0}'.format(newName)
-                print 'Node edition aborted !'
+            if newName in list(self.scene().nodes.keys()):
+                print('A node with the same name already exists : {0}'.format(newName))
+                print('Node edition aborted !')
                 return
             else:
                 #oldName = node.name
@@ -871,12 +878,12 @@ class Nodz(QtWidgets.QGraphicsView):
 
                 # Store new node name in the connections
                 if node.sockets:
-                    for socket in node.sockets.values():
+                    for socket in list(node.sockets.values()):
                         for connection in socket.connections:
                             connection.socketNode = newName
 
                 if node.plugs:
-                    for plug in node.plugs.values():
+                    for plug in list(node.plugs.values()):
                         for connection in plug.connections:
                             connection.plugNode = newName
 
@@ -925,14 +932,14 @@ class Nodz(QtWidgets.QGraphicsView):
         :param socketMaxConnections: The maximum connections that the socket can have (-1 for infinite).
 
         """
-        if not node in self.scene().nodes.values():
-            print 'Node object does not exist !'
-            print 'Attribute creation aborted !'
+        if not node in list(self.scene().nodes.values()):
+            print('Node object does not exist !')
+            print('Attribute creation aborted !')
             return
 
         if name in node.attrs:
-            print 'An attribute with the same name already exists : {0}'.format(name)
-            print 'Attribute creation aborted !'
+            print('An attribute with the same name already exists : {0}'.format(name))
+            print('Attribute creation aborted !')
             return
 
         node._createAttribute(name=name, index=index, preset=preset, plug=plug, socket=socket, dataType=dataType, plugMaxConnections=plugMaxConnections, socketMaxConnections=socketMaxConnections)
@@ -951,9 +958,9 @@ class Nodz(QtWidgets.QGraphicsView):
         :param index: The index of the attribute in the node.
 
         """
-        if not node in self.scene().nodes.values():
-            print 'Node object does not exist !'
-            print 'Attribute deletion aborted !'
+        if not node in list(self.scene().nodes.values()):
+            print('Node object does not exist !')
+            print('Attribute deletion aborted !')
             return
 
         node._deleteAttribute(index)
@@ -978,15 +985,15 @@ class Nodz(QtWidgets.QGraphicsView):
         :param newIndex: The index for the given attribute.
 
         """
-        if not node in self.scene().nodes.values():
-            print 'Node object does not exist !'
-            print 'Attribute creation aborted !'
+        if not node in list(self.scene().nodes.values()):
+            print('Node object does not exist !')
+            print('Attribute creation aborted !')
             return
 
         if newName is not None:
             if newName in node.attrs:
-                print 'An attribute with the same name already exists : {0}'.format(newName)
-                print 'Attribute edition aborted !'
+                print('An attribute with the same name already exists : {0}'.format(newName))
+                print('Attribute edition aborted !')
                 return
             else:
                 oldName = node.attrs[index]
@@ -1016,7 +1023,7 @@ class Nodz(QtWidgets.QGraphicsView):
             utils._swapListIndices(node.attrs, index, newIndex)
 
             # Refresh connections.
-            for plug in node.plugs.values():
+            for plug in list(node.plugs.values()):
                 plug.update()
                 if plug.connections:
                     for connection in plug.connections:
@@ -1030,7 +1037,7 @@ class Nodz(QtWidgets.QGraphicsView):
                             connection.plugAttr = newName
                         connection.updatePath()
 
-            for socket in node.sockets.values():
+            for socket in list(node.sockets.values()):
                 socket.update()
                 if socket.connections:
                     for connection in socket.connections:
@@ -1062,7 +1069,7 @@ class Nodz(QtWidgets.QGraphicsView):
 
         """
         nodeWidth = 300    #default value, will be replaced by node.baseWidth + margin when iterating on the first node
-        sceneNodes = self.scene().nodes.keys()
+        sceneNodes = list(self.scene().nodes.keys())
         if (nodes is None) or len(nodes)==0:
             nodes = sceneNodes
         rootNodes = []
@@ -1074,7 +1081,7 @@ class Nodz(QtWidgets.QGraphicsView):
             if node is not None:
                 nodeWidth = node.baseWidth + margin
                 isRoot = True
-                for plug in node.plugs.values():
+                for plug in list(node.plugs.values()):
                     isRoot &= (len(plug.connections)==0)
                 if isRoot:
                     rootNodes.append(node)
@@ -1131,8 +1138,8 @@ class Nodz(QtWidgets.QGraphicsView):
                 currentYpos = baseYpos
                 for node in nodesAtLevel:
                     if len(node.plugs)>0:
-                        if len(node.plugs.values()[0].connections)>0:
-                            parentPosition = node.plugs.values()[0].connections[0].socketItem.parentItem().pos()
+                        if len(list(node.plugs.values())[0].connections)>0:
+                            parentPosition = list(node.plugs.values())[0].connections[0].socketItem.parentItem().pos()
                             currentXpos = parentPosition.x() - nodeWidth
                             #currentYpos = parentPosition.y()
                     if (node not in alreadyVisitedNodes) and (node.name in nodes):
@@ -1160,7 +1167,7 @@ class Nodz(QtWidgets.QGraphicsView):
                             self.scene().setSceneRect(sceneRect)
 
                         if node_pos.x() < 0 or node_pos.x() > self.scene().width() or node_pos.y()<0 or node_pos.y() > self.scene().height():
-                            print "Warning: {0}: Invalid node position : ({1} ; {2}), frame dimension: ({3} ; {4}).".format(node.name, node_pos.x(), node_pos.y(), self.scene().width(), self.scene().height())
+                            print("Warning: {0}: Invalid node position : ({1} ; {2}), frame dimension: ({3} ; {4}).".format(node.name, node_pos.x(), node_pos.y(), self.scene().width(), self.scene().height()))
 
                         nodesMovedList.append(node.name)
                         fromPosList.append(node.pos())
@@ -1192,7 +1199,7 @@ class Nodz(QtWidgets.QGraphicsView):
         # Store nodes data.
         data['NODES'] = dict()
 
-        nodes = self.scene().nodes.keys()
+        nodes = list(self.scene().nodes.keys())
         for node in nodes:
             nodeInst = self.scene().nodes[node]
             preset = nodeInst.nodePreset
@@ -1222,8 +1229,8 @@ class Nodz(QtWidgets.QGraphicsView):
         try:
             utils._saveData(filePath=filePath, data=data)
         except:
-            print 'Invalid path : {0}'.format(filePath)
-            print 'Save aborted !'
+            print('Invalid path : {0}'.format(filePath))
+            print('Save aborted !')
             return False
 
         # Emit signal.
@@ -1242,13 +1249,13 @@ class Nodz(QtWidgets.QGraphicsView):
         if os.path.exists(filePath):
             data = utils._loadData(filePath=filePath)
         else:
-            print 'Invalid path : {0}'.format(filePath)
-            print 'Load aborted !'
+            print('Invalid path : {0}'.format(filePath))
+            print('Load aborted !')
             return False
 
         # Apply nodes data.
         nodesData = data['NODES']
-        nodesName = nodesData.keys()
+        nodesName = list(nodesData.keys())
 
         for name in nodesName:
             preset = nodesData[name]['preset']
@@ -1279,7 +1286,7 @@ class Nodz(QtWidgets.QGraphicsView):
                     socketMaxConnections = attrData['socketMaxConnections']
 
                 # un-serialize data type if needed
-                if (isinstance(dataType, unicode) and dataType.find('<') == 0):
+                if (isinstance(dataType, str) and dataType.find('<') == 0):
                     dataType = eval(str(dataType.split('\'')[1]))
 
                 self.createAttribute(node=node,
@@ -1319,7 +1326,7 @@ class Nodz(QtWidgets.QGraphicsView):
         self.signal_GraphLoaded.emit()
 
     def removeConnectionByInfo(self, connectionInfo):
-        for item in self.scene().items():
+        for item in list(self.scene().items()):
             if (isinstance(item, ConnectionItem)):
                 if (item.plugNode == connectionInfo.plugNode and item.plugAttr == connectionInfo.plugAttr and item.socketNode == connectionInfo.socketNode and item.socketAttr == connectionInfo.socketAttr):
                     item._remove()
@@ -1373,7 +1380,7 @@ class Nodz(QtWidgets.QGraphicsView):
 
         data = list()
 
-        for item in scene.items():
+        for item in list(scene.items()):
             if isinstance(item, ConnectionItem):
                 connection = item
 
@@ -1528,7 +1535,7 @@ class NodeScene(QtWidgets.QGraphicsScene):
         Update the connections position.
 
         """
-        for connection in [i for i in self.items() if isinstance(i, ConnectionItem)]:
+        for connection in [i for i in list(self.items()) if isinstance(i, ConnectionItem)]:
             connection.target_point = connection.target.center()
             connection.source_point = connection.source.center()
             connection.updatePath()
@@ -1709,8 +1716,8 @@ class NodeItem(QtWidgets.QGraphicsItem):
 
         """
         if name in self.attrs:
-            print 'An attribute with the same name already exists on this node : {0}'.format(name)
-            print 'Attribute creation aborted !'
+            print('An attribute with the same name already exists on this node : {0}'.format(name))
+            print('Attribute creation aborted !')
             return
 
         self.attrPreset = preset
@@ -1770,7 +1777,7 @@ class NodeItem(QtWidgets.QGraphicsItem):
         name = self.attrs[index]
 
         # Remove socket and its connections.
-        if name in self.sockets.keys():
+        if name in list(self.sockets.keys()):
             for connection in self.sockets[name].connections:
                 connection._remove()
 
@@ -1778,7 +1785,7 @@ class NodeItem(QtWidgets.QGraphicsItem):
             self.sockets.pop(name)
 
         # Remove plug and its connections.
-        if name in self.plugs.keys():
+        if name in list(self.plugs.keys()):
             for connection in self.plugs[name].connections:
                 connection._remove()
 
@@ -1800,14 +1807,14 @@ class NodeItem(QtWidgets.QGraphicsItem):
         Update the connections position.
 
         """
-        for plug in self.plugs.values():
+        for plug in list(self.plugs.values()):
             for connection in plug.connections:
                 if (connection.target is not None and connection.source is not None):
                     connection.target_point = connection.target.center()
                     connection.source_point = connection.source.center()
                     connection.updatePath()
 
-        for socket in self.sockets.values():
+        for socket in list(self.sockets.values()):
             for connection in socket.connections:
                 if (connection.target is not None and connection.source is not None):
                     connection.target_point = connection.target.center()
@@ -1832,14 +1839,14 @@ class NodeItem(QtWidgets.QGraphicsItem):
 
         #store connections before reconnecting in-out nodes, cause it will shunt incoming connection
         for selectedNode in nodzInst.selectedNodes:
-            for socket in self.scene().nodes[selectedNode].sockets.values(): # Remove all sockets connections not in selection
+            for socket in list(self.scene().nodes[selectedNode].sockets.values()): # Remove all sockets connections not in selection
                 for iCon in range(0, len(socket.connections)):
                     if socket.connections[iCon].plugNode not in nodzInst.selectedNodes:
                         selectionPlugConnectionItems.append(socket.connections[iCon])
                         removedConnections.append(ConnectionInfo(socket.connections[iCon]))
 
 
-            for plug in self.scene().nodes[selectedNode].plugs.values(): # Remove all plugs connections.
+            for plug in list(self.scene().nodes[selectedNode].plugs.values()): # Remove all plugs connections.
                 for iCon in range(0, len(plug.connections)):
                     if plug.connections[iCon].socketNode not in nodzInst.selectedNodes:
                         selectionSocketConnectionItems.append(plug.connections[iCon])
@@ -1856,7 +1863,7 @@ class NodeItem(QtWidgets.QGraphicsItem):
 
         # actually remove remaining connections
         for selectedNode in nodzInst.selectedNodes:
-            for socket in self.scene().nodes[selectedNode].sockets.values(): # Remove all sockets connections.
+            for socket in list(self.scene().nodes[selectedNode].sockets.values()): # Remove all sockets connections.
                 if len(socket.connections) > 0:
                     connectionIndex = len(socket.connections) - 1
                     while connectionIndex >= 0:
@@ -1865,7 +1872,7 @@ class NodeItem(QtWidgets.QGraphicsItem):
                         connectionIndex -= 1
 
         for selectedNode in nodzInst.selectedNodes:
-            for plug in self.scene().nodes[selectedNode].plugs.values(): # Remove all plugs connections.
+            for plug in list(self.scene().nodes[selectedNode].plugs.values()): # Remove all plugs connections.
                 if len(plug.connections) > 0:
                     connectionIndex = len(plug.connections) - 1
                     while connectionIndex >= 0:
@@ -1895,12 +1902,12 @@ class NodeItem(QtWidgets.QGraphicsItem):
 
         """
         # Remove all sockets connections.
-        for socket in self.sockets.values():
+        for socket in list(self.sockets.values()):
             while len(socket.connections)>0:
                 socket.connections[0]._remove()
 
         # Remove all plugs connections.
-        for plug in self.plugs.values():
+        for plug in list(self.plugs.values()):
             while len(plug.connections)>0:
                 plug.connections[0]._remove()
 
@@ -1993,11 +2000,11 @@ class NodeItem(QtWidgets.QGraphicsItem):
         return the attribute plug
         """
         if (len(self.plugs) == 1):
-            return self.plugs.itervalues().next()
+            return next(iter(self.plugs.values()))
         attributeName = self.getAttributeAtPos(scenePos)
         if (attributeName is not None):
             #print "found plug for {}".format(attributeName)
-            if attributeName in self.plugs.keys():
+            if attributeName in list(self.plugs.keys()):
                 return self.plugs[attributeName]
         #print "found no plug"
         return None
@@ -2007,11 +2014,11 @@ class NodeItem(QtWidgets.QGraphicsItem):
         return the attribute plug
         """
         if (len(self.sockets) == 1):
-            return self.sockets.itervalues().next()
+            return next(iter(self.sockets.values()))
         attributeName = self.getAttributeAtPos(scenePos)
         if (attributeName is not None):
             #print "found socket for {}".format(attributeName)
-            if attributeName in self.sockets.keys():
+            if attributeName in list(self.sockets.keys()):
                 return self.sockets[attributeName]
         #print "found no socket"
         return None
@@ -2039,7 +2046,7 @@ class NodeItem(QtWidgets.QGraphicsItem):
 
         viewport_rect = QtCore.QRect(0, 0, nodzInst.viewport().width(), nodzInst.viewport().height())
         visible_scene_rect = nodzInst.mapToScene(viewport_rect).boundingRect()
-        nodeSizeInScreenPixels = self.baseWidth * viewport_rect.width() / visible_scene_rect.width()
+        nodeSizeInScreenPixels = old_div(self.baseWidth * viewport_rect.width(), visible_scene_rect.width())
 
         # displaying icon :
 
@@ -2074,12 +2081,12 @@ class NodeItem(QtWidgets.QGraphicsItem):
             if (nodeSizeInScreenPixels > big_icon_display_limit and nodeSizeInScreenPixels > titleDisplayLimitPixOnScreen):  # display beside the node title
                 iconSize = 32
                 margin = 4
-                iconRect = QtCore.QRect(textRect.left() - (iconSize/2),
+                iconRect = QtCore.QRect(textRect.left() - (old_div(iconSize,2)),
                         textRect.top() - (iconSize + margin) + text_height,
                         iconSize, iconSize)
                 self.icon.paint(painter, iconRect, QtCore.Qt.AlignCenter, QtGui.QIcon.Normal, QtGui.QIcon.On)
 
-                textRect.setRect(textRect.left() + (iconSize/2), textRect.top() - (iconSize - text_height + margin) / 2, textRect.width(), textRect.height())
+                textRect.setRect(textRect.left() + (old_div(iconSize,2)), textRect.top() - old_div((iconSize - text_height + margin), 2), textRect.width(), textRect.height())
 
             elif (nodeSizeInScreenPixels < big_icon_display_limit):
                 iconSize = 128
@@ -2088,8 +2095,8 @@ class NodeItem(QtWidgets.QGraphicsItem):
                     self.scaledIcon = QtGui.QIcon(scaledPixmap2)
 
                 # center on node attributes
-                iconRect = QtCore.QRect(0 + (self.baseWidth - iconSize)/2,
-                        0 + (self.baseWidth - iconSize)/2,
+                iconRect = QtCore.QRect(0 + old_div((self.baseWidth - iconSize),2),
+                        0 + old_div((self.baseWidth - iconSize),2),
                         iconSize, iconSize)
 
                 self.scaledIcon.paint(painter, iconRect, QtCore.Qt.AlignCenter, QtGui.QIcon.Normal, QtGui.QIcon.On)
@@ -2105,7 +2112,7 @@ class NodeItem(QtWidgets.QGraphicsItem):
             for attr in self.attrs:
 
                 # Attribute rect.
-                rect = QtCore.QRect(self.border / 2,
+                rect = QtCore.QRect(old_div(self.border, 2),
                                     self.baseHeight - self.radius + offset,
                                     self.baseWidth - self.border,
                                     self.attrHeight)
@@ -2125,7 +2132,7 @@ class NodeItem(QtWidgets.QGraphicsItem):
                 self._attrPen.setColor(utils._convertDataToColor([0, 0, 0, 0]))
                 painter.setPen(self._attrPen)
                 painter.setBrush(self._attrBrush)
-                if (offset / self.attrHeight) % 2:
+                if (old_div(offset, self.attrHeight)) % 2:
                     painter.setBrush(self._attrBrushAlt)
 
                 painter.drawRect(rect)
@@ -2166,11 +2173,11 @@ class NodeItem(QtWidgets.QGraphicsItem):
         if (self.scene().parent().editEnabled):
             maxZValue = 0
             nodes = self.scene().nodes
-            for node in nodes.values():
+            for node in list(nodes.values()):
                 node.setZValue(node.baseZValue)
                 maxZValue = max(maxZValue, node.baseZValue)
 
-            for item in self.scene().items():
+            for item in list(self.scene().items()):
                 if isinstance(item, ConnectionItem):
                     item.setZValue(1)
 
@@ -2211,11 +2218,11 @@ class NodeItem(QtWidgets.QGraphicsItem):
                     if self.scene().views()[0].gridSnapToggle or self.scene().views()[0]._nodeSnap:
                         gridSize = self.scene().gridSize
 
-                        currentPos = self.mapToScene(event.pos().x() - self.baseWidth / 2,
-                                                    event.pos().y() - self.height / 2)
+                        currentPos = self.mapToScene(event.pos().x() - old_div(self.baseWidth, 2),
+                                                    event.pos().y() - old_div(self.height, 2))
 
-                        snap_x = (round(currentPos.x() / gridSize) * gridSize) - gridSize/4
-                        snap_y = (round(currentPos.y() / gridSize) * gridSize) - gridSize/4
+                        snap_x = (round(old_div(currentPos.x(), gridSize)) * gridSize) - old_div(gridSize,4)
+                        snap_y = (round(old_div(currentPos.y(), gridSize)) * gridSize) - old_div(gridSize,4)
                         snap_pos = QtCore.QPointF(snap_x, snap_y)
                         self.setPos(snap_pos)
 
@@ -2234,8 +2241,8 @@ class NodeItem(QtWidgets.QGraphicsItem):
                 # Handle drop on link : highlight currently selected link if any, and only if nodeItem is a pass through (1 in 1 out)
                 nodzInst.currentHoveredLink = None
                 if (len(self.plugs) == 1 and len(self.sockets) == 1):
-                    theNodePlug = self.plugs.itervalues().next()
-                    theNodeSocket = self.sockets.itervalues().next()
+                    theNodePlug = next(iter(self.plugs.values()))
+                    theNodeSocket = next(iter(self.sockets.values()))
                     plugConnections = theNodePlug.connections
                     socketConnections = theNodeSocket.connections
                     if (len(plugConnections) == 0 and len(socketConnections) == 0):
@@ -2313,8 +2320,8 @@ class NodeItem(QtWidgets.QGraphicsItem):
                         toNode = nodzInst.currentHoveredLink.socketNode
                         toAttr = nodzInst.currentHoveredLink.socketAttr
 
-                        theNodePlugAttr = self.plugs.itervalues().next().attribute
-                        theNodeSocketAttr = self.sockets.itervalues().next().attribute
+                        theNodePlugAttr = iter(self.plugs.values()).next().attribute
+                        theNodeSocketAttr = iter(self.sockets.values()).next().attribute
 
                         removedConnections = list()
                         addedConnections = list()
@@ -2343,8 +2350,8 @@ class NodeItem(QtWidgets.QGraphicsItem):
                     toNode = nodzInst.currentHoveredLink.socketNode
                     toAttr = nodzInst.currentHoveredLink.plugAttr
 
-                    theNodePlugAttr = self.plugs.itervalues().next().key()
-                    theNodeSocketAttr = self.sockets.itervalues().next()().key()
+                    theNodePlugAttr = iter(self.plugs.values()).next().key()
+                    theNodeSocketAttr = iter(self.sockets.values()).next()().key()
 
                     removedConnections = list()
                     addedConnections = list()
@@ -2379,7 +2386,7 @@ class NodeItem(QtWidgets.QGraphicsItem):
         if (self.scene().parent().editEnabled):
             nodzInst = self.scene().views()[0]
 
-            for item in nodzInst.scene().items():
+            for item in list(nodzInst.scene().items()):
                 if isinstance(item, ConnectionItem):
                     item.setZValue(0)
 
@@ -2486,7 +2493,7 @@ class SlotItem(QtWidgets.QGraphicsItem):
             while (not len(nodesToProcess) == 0 and validConnection):
                 for nodeToProcess in nodesToProcess:
                     processedNodes.append(nodeToProcess.name)
-                    for socket in nodeToProcess.sockets.values():
+                    for socket in list(nodeToProcess.sockets.values()):
                         for connection in socket.connections:
                             if connection.plugNode in processedNodes:
                                 validConnection = validConnection and connection.plugNode != processedNodes[0] # processedNodes[0] is theSocketItem.parentItem()
@@ -2498,7 +2505,7 @@ class SlotItem(QtWidgets.QGraphicsItem):
                 nextNodesToProcess[:] = []
                 # del nodesToProcess[:]
             if not validConnection:
-                print "This Connection would make a loop, this is forbidden"
+                print("This Connection would make a loop, this is forbidden")
                 return
 
         #otherwise, all fine.
@@ -2722,7 +2729,7 @@ class PlugItem(SlotItem):
 
         x = self.parentItem().baseWidth - (width / 2.0)
         y = (self.parentItem().baseHeight - config['node_radius'] +
-             self.parentItem().attrHeight / 4 +
+             old_div(self.parentItem().attrHeight, 4) +
              self.parentItem().attrs.index(self.attribute) * self.parentItem().attrHeight)
 
         rect = QtCore.QRectF(QtCore.QRect(x, y, width, height))
@@ -2834,7 +2841,7 @@ class SocketItem(SlotItem):
 
         x = - width / 2.0
         y = (self.parentItem().baseHeight - config['node_radius'] +
-            (self.parentItem().attrHeight/4) +
+            (old_div(self.parentItem().attrHeight,4)) +
              self.parentItem().attrs.index(self.attribute) * self.parentItem().attrHeight )
 
         rect = QtCore.QRectF(QtCore.QRect(x, y, width, height))
@@ -3009,7 +3016,7 @@ class ConnectionItem(QtWidgets.QGraphicsPathItem):
         """
         nodzInst = self.scene().views()[0]
 
-        for item in nodzInst.scene().items():
+        for item in list(nodzInst.scene().items()):
             if isinstance(item, ConnectionItem):
                 item.setZValue(0)
 

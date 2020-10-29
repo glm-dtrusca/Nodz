@@ -10,11 +10,16 @@ import re
 import json
 import copy
 
-from glm.Qtpy.Qt import QtGui, QtCore, QtWidgets
+from glm.Qtpy.Qt import QtGui, QtCore, QtWidgets, Qt
 from . import nodz_utils as utils
 from . import nodz_extra
 
 defaultConfigPath = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'default_config.json')
+
+if Qt.IsPyQt5 or Qt.IsPyQt4:
+    signalObject = 'PyQt_PyObject'
+else:
+    signalObject = 'PyObject'
 
 class ConnectionInfo(object):
      def __init__(self, connectionItem):
@@ -37,50 +42,50 @@ class Nodz(QtWidgets.QGraphicsView):
     # if we want to be more generic, should use pre and post signals, and fetch whatever in Layout side, but this is not resilient to nested calls :/
     # some calls have not been handled via those methodes : createNode (handled via nodeCreator overload), editNode, deleteNode, createAttribute, editAttribute, deleteAttribute : they are not called directly by LayoutEditor, but encapsulated via nodeCreator, loadGraph, etc. We issue less events if handling the top level action issueing this
     # all undo calls start with emitter nodzInstance
-    signal_UndoRedoModifySelection = QtCore.Signal(object, object, object) # node id list before, node id list after. signal_NodeSelected does not send previous selection
-    signal_UndoRedoDeleteSelectedNodes = QtCore.Signal(object, object) # list of deleted nodes (user data copies). signal_NodeDeleted does only send deleted node names, too late to get their userData for redo
-    # # signal_UndoRedoEditNodeName = QtCore.Signal(object, str, str) # node name before, node name after UNUSED
-    signal_UndoRedoAddNode = QtCore.Signal(object, object) # node added user data. For consistency with signal_UndoRedoDeleteSelectedNodes (we may actually store undo via signal_NodeCreated, but would be called a lot of time from loadGraph)
-    signal_UndoRedoMoveNodes = QtCore.Signal(object, object, object, object) # node name list, fromPos list, toPos list. signal_NodeMoved does not send previous position
-    signal_UndoRedoConnectNodes = QtCore.Signal(object, object, object)  # list of removed ConnectionInfo (potentially due to addition), list of new ConnectionInfo. Could deal with it with plug/socket connected / disconnected but would be tedious with a lot of calls
+    signal_UndoRedoModifySelection = QtCore.Signal(signalObject, signalObject, signalObject) # node id list before, node id list after. signal_NodeSelected does not send previous selection
+    signal_UndoRedoDeleteSelectedNodes = QtCore.Signal(signalObject, signalObject) # list of deleted nodes (user data copies). signal_NodeDeleted does only send deleted node names, too late to get their userData for redo
+    # # signal_UndoRedoEditNodeName = QtCore.Signal(signalObject, str, str) # node name before, node name after UNUSED
+    signal_UndoRedoAddNode = QtCore.Signal(signalObject, signalObject) # node added user data. For consistency with signal_UndoRedoDeleteSelectedNodes (we may actually store undo via signal_NodeCreated, but would be called a lot of time from loadGraph)
+    signal_UndoRedoMoveNodes = QtCore.Signal(signalObject, signalObject, signalObject, signalObject) # node name list, fromPos list, toPos list. signal_NodeMoved does not send previous position
+    signal_UndoRedoConnectNodes = QtCore.Signal(signalObject, signalObject, signalObject)  # list of removed ConnectionInfo (potentially due to addition), list of new ConnectionInfo. Could deal with it with plug/socket connected / disconnected but would be tedious with a lot of calls
 
-    signal_dropOnNode = QtCore.Signal(object, object) #nodzInst, nodeItem
+    signal_dropOnNode = QtCore.Signal(signalObject, signalObject) #nodzInst, nodeItem
 
-    signal_StartCompoundInteraction = QtCore.Signal(object) # starts user interaction on a nodz
-    signal_EndCompoundInteraction = QtCore.Signal(object, bool) # end user interaction on a nodz
+    signal_StartCompoundInteraction = QtCore.Signal(signalObject) # starts user interaction on a nodz
+    signal_EndCompoundInteraction = QtCore.Signal(signalObject, bool) # end user interaction on a nodz
 
-    signal_NodeCreated = QtCore.Signal(object)
-    signal_NodePreDeleted = QtCore.Signal(object)
-    signal_NodeDeleted = QtCore.Signal(object)
-    signal_NodeEdited = QtCore.Signal(object, object)
-    signal_NodeSelected = QtCore.Signal(object)
-    signal_NodeMoved = QtCore.Signal(str, object)
-    # signal_NodeRightClicked = QtCore.Signal(str)
-    signal_NodeDoubleClicked = QtCore.Signal(str)
+    signal_NodeCreated = QtCore.Signal(signalObject)
+    signal_NodePreDeleted = QtCore.Signal(signalObject)
+    signal_NodeDeleted = QtCore.Signal(signalObject)
+    signal_NodeEdited = QtCore.Signal(signalObject, signalObject)
+    signal_NodeSelected = QtCore.Signal(signalObject)
+    signal_NodeMoved = QtCore.Signal(signalObject, signalObject)
+    # signal_NodeRightClicked = QtCore.Signal(signalObject)
+    signal_NodeDoubleClicked = QtCore.Signal(signalObject)
 
-    signal_ViewContextMenuEvent = QtCore.Signal(object) # view context menu event
-    signal_NodeContextMenuEvent = QtCore.Signal(object, str) # node context menu event, node name
+    signal_ViewContextMenuEvent = QtCore.Signal(signalObject) # view context menu event
+    signal_NodeContextMenuEvent = QtCore.Signal(signalObject, signalObject) # node context menu event, node name
 
-    signal_AttrCreated = QtCore.Signal(object, object)
-    signal_AttrDeleted = QtCore.Signal(object, object)
-    signal_AttrEdited = QtCore.Signal(object, object, object)
+    signal_AttrCreated = QtCore.Signal(signalObject, signalObject)
+    signal_AttrDeleted = QtCore.Signal(signalObject, signalObject)
+    signal_AttrEdited = QtCore.Signal(signalObject, signalObject, signalObject)
 
-    signal_PlugConnected = QtCore.Signal(object, object, object, object)
-    signal_PlugDisconnected = QtCore.Signal(object, object, object, object)
-    signal_SocketConnected = QtCore.Signal(object, object, object, object)
-    signal_SocketDisconnected = QtCore.Signal(object, object, object, object)
+    signal_PlugConnected = QtCore.Signal(signalObject, signalObject, signalObject, signalObject)
+    signal_PlugDisconnected = QtCore.Signal(signalObject, signalObject, signalObject, signalObject)
+    signal_SocketConnected = QtCore.Signal(signalObject, signalObject, signalObject, signalObject)
+    signal_SocketDisconnected = QtCore.Signal(signalObject, signalObject, signalObject, signalObject)
 
     signal_GraphSaved = QtCore.Signal()
     signal_GraphLoaded = QtCore.Signal()
     signal_GraphCleared = QtCore.Signal()
     signal_GraphEvaluated = QtCore.Signal()
 
-    signal_KeyPressed = QtCore.Signal(object)
+    signal_KeyPressed = QtCore.Signal(signalObject)
     signal_Dropped = QtCore.Signal()
 
-    signal_dragEvent = QtCore.Signal(object, object) # dragDropEvent, nodzInst
-    signal_dragMoveEvent = QtCore.Signal(object, object) # dragDropEvent, nodzInst
-    signal_dropEvent = QtCore.Signal(object, object) # dragDropEvent, nodzInst
+    signal_dragEvent = QtCore.Signal(signalObject, signalObject) # dragDropEvent, nodzInst
+    signal_dragMoveEvent = QtCore.Signal(signalObject, signalObject) # dragDropEvent, nodzInst
+    signal_dropEvent = QtCore.Signal(signalObject, signalObject) # dragDropEvent, nodzInst
 
     def __init__(self, parent, configPath=defaultConfigPath):
         """
@@ -1414,7 +1419,7 @@ class NodeScene(QtWidgets.QGraphicsScene):
     The scene displaying all the nodes.
 
     """
-    signal_NodeMoved = QtCore.Signal(str, object)
+    signal_NodeMoved = QtCore.Signal(signalObject, signalObject)
 
     def __init__(self, parent):
         """

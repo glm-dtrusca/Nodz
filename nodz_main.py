@@ -663,7 +663,6 @@ class Nodz(QtWidgets.QGraphicsView):
 
         # Emit signal.
         if len(selected_nodes) > 0:
-            print("In Nodz : delete selectedNodes is {}".format(selected_nodes))
             self.signal_NodeDeleted.emit(selected_nodes)
             self.signal_UndoRedoDeleteSelectedNodes.emit(self, deletedNodesUserData)
 
@@ -844,7 +843,6 @@ class Nodz(QtWidgets.QGraphicsView):
             node._remove()
 
             # Emit signal.
-            print("In Nodz : deleteNodes is {}".format([nodeName]))
             self.signal_NodeDeleted.emit([nodeName])
             self.signal_UndoRedoConnectNodes.emit(self, removedConnections, addedConnections)
             self.signal_UndoRedoDeleteSelectedNodes.emit(self, selected_nodes)

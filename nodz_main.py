@@ -189,11 +189,15 @@ class Nodz(QtWidgets.QGraphicsView):
             delta = event.angleDelta().y()
         else:
             delta = event.delta()
+        print("delta", delta)
 
         if delta > 0:
             zoomFactor = inFactor
-        else:
+            self.scale(zoomFactor, zoomFactor)
+        elif delta < 0:
             zoomFactor = outFactor
+            self.scale(zoomFactor, zoomFactor)
+        # if delta is 0 we probably have alt key active or things like that
 
         self.scale(zoomFactor, zoomFactor)
         self.currentState = 'DEFAULT'

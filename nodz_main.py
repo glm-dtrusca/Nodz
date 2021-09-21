@@ -199,7 +199,6 @@ class Nodz(QtWidgets.QGraphicsView):
             self.scale(zoomFactor, zoomFactor)
         # if delta is 0 we probably have alt key active or things like that
 
-        self.scale(zoomFactor, zoomFactor)
         self.currentState = 'DEFAULT'
 
     def contextMenuEvent(self, event):

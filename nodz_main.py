@@ -1619,6 +1619,18 @@ class NodeItem(QtWidgets.QGraphicsItem):
         return aHeight
 
     @property
+    def brush(self):
+        """
+        Return the brush based on the selection state of the node.
+
+        """
+        nodzInst = self.scene().views()[0]
+        if self.isSelected():
+            return self._brushSel
+        else:
+            return self._brush
+
+    @property
     def pen(self):
         """
         Return the pen based on the selection state of the node.
@@ -1655,6 +1667,10 @@ class NodeItem(QtWidgets.QGraphicsItem):
         self._brush = QtGui.QBrush()
         self._brush.setStyle(QtCore.Qt.SolidPattern)
         self._brush.setColor(utils._convertDataToColor(config[self.nodePreset]['bg']))
+
+        self._brushSel = QtGui.QBrush()
+        self._brushSel.setStyle(QtCore.Qt.SolidPattern)
+        self._brushSel.setColor(utils._convertDataToColor(config[self.nodePreset]['bg_sel']))
 
         self._pen = QtGui.QPen()
         self._pen.setStyle(QtCore.Qt.SolidLine)
@@ -2043,7 +2059,7 @@ class NodeItem(QtWidgets.QGraphicsItem):
 
         """
         # Node base.
-        painter.setBrush(self._brush)
+        painter.setBrush(self.brush)
         painter.setPen(self.pen)
 
         nodzInst = self.scene().views()[0]

@@ -54,6 +54,8 @@ class Nodz(QtWidgets.QGraphicsView):
     signal_StartCompoundInteraction = QtCore.Signal(signalObject) # starts user interaction on a nodz
     signal_EndCompoundInteraction = QtCore.Signal(signalObject, bool) # end user interaction on a nodz
 
+    signal_SceneDoubleClicked = QtCore.Signal()
+
     signal_NodeCreated = QtCore.Signal(signalObject)
     signal_NodePreDeleted = QtCore.Signal(signalObject)
     signal_NodeDeleted = QtCore.Signal(signalObject)
@@ -210,6 +212,15 @@ class Nodz(QtWidgets.QGraphicsView):
             item.contextMenuEvent(event)
             return
         self.signal_ViewContextMenuEvent.emit(event)
+
+    def mouseDoubleClickEvent(self, event):
+        """
+        Emit a signal.
+
+        """
+        super(Nodz, self).mouseDoubleClickEvent(event)
+
+        self.signal_SceneDoubleClicked.emit()        
 
     def mousePressEvent(self, event):
         """
@@ -485,7 +496,7 @@ class Nodz(QtWidgets.QGraphicsView):
         if event.key() == QtCore.Qt.Key_S:
             self._nodeSnap = False
 
-        if event.key() in self.pressedKeys:
+        if event.key() in self.pressedKeys:            
             self.pressedKeys.remove(event.key())
 
     def _initRubberband(self, position):
